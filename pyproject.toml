@@ -1,0 +1,21 @@
+[project]
+name = "dataexplorer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "alembic>=1.15.2",
+    "langchain>=0.3.25",
+    "langchain-core>=0.3.60",
+    "langchain-openai>=0.3.17",
+    "numpy>=2.0.0",
+    "openai>=1.78.1",
+    "pandasai>=2.3.0",
+    "psycopg2-binary>=2.9.10",
+    "python-dotenv>=1.1.0",
+    "pyyaml>=6.0.2",
+    "sqlmodel>=0.0.24",
+    "streamlit>=1.45.1",
+    "streamlit-chat>=0.1.1",
+]
