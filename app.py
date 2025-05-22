@@ -3,11 +3,22 @@ import streamlit as st
 from streamlit_chat import message
 import pandas as pd
 from agent.agent import query
-from database.database_functions import create_session, delete_session, delete_session_messages, get_all_sessions_from_db, get_default_session_id, load_session_messages
+from database.database_functions import create_session, delete_session, delete_session_messages, get_sessions_for_user, get_default_session_id, load_session_messages
+from auth import authenticate, logout
+from streamlit_cookies_controller import CookieController
 
 load_dotenv()
 
 st.set_page_config(layout="wide")
+
+controller = CookieController()
+
+authenticate(controller)
+
+def validate_cookie() -> None:
+    if not controller.get("session"):
+        st.rerun()
+
 st.title("📊 Data Explorer Bot")
 
 if "sessions" not in st.session_state:
@@ -20,10 +31,15 @@ if "sessions" not in st.session_state:
 if "current" not in st.session_state:
     st.session_state.current = "Default"
 
-all_sessions = get_all_sessions_from_db()
+validate_cookie()
+all_sessions = get_sessions_for_user(controller.get("session"))
 for name in all_sessions:
     if name not in st.session_state.sessions:
         st.session_state.sessions[name] = []
+
+if st.sidebar.button("Logout"):
+    validate_cookie()
+    logout(controller)
 
 new_name = st.sidebar.text_input("New session name", "")
 
@@ -34,7 +50,8 @@ if st.sidebar.button("➕ Create Session"):
     elif candidate in st.session_state.sessions:
         st.sidebar.error("That session already exists.")
     else:
-        new_session_id = create_session(name=candidate)
+        validate_cookie()
+        new_session_id = create_session(name=candidate, access_token=controller.get("session"))
         all_sessions[candidate] = new_session_id
         st.session_state.sessions[candidate] = []
         st.session_state.current = candidate
@@ -46,15 +63,17 @@ if st.sidebar.button("➖ Delete Session"):
     if current == "Default":
         st.sidebar.error("Cannot delete the Default session.")
     else:
+        validate_cookie()
         session_id = all_sessions[current]
         delete_session(all_sessions[current])                  
         st.session_state.sessions.pop(current)
-        all_sessions = get_all_sessions_from_db()
+        all_sessions = get_sessions_for_user(controller.get("session"))
         st.session_state.current = "Default"
         st.rerun()             
 
 
 def on_session_change():
+    validate_cookie()
     name = st.session_state.current
     if name in all_sessions:
         session_id = all_sessions[name]
@@ -98,6 +117,7 @@ def render_messages():
 
 
 if st.button("Clear Chat"):
+    validate_cookie()
     session_id = all_sessions[st.session_state.current]
     delete_session_messages(session_id)
     st.session_state.sessions[st.session_state.current] = []
@@ -105,7 +125,11 @@ if st.button("Clear Chat"):
 
 
 prompt = st.text_input("Ask about your data…", key="prompt")
+
 if st.button("Send"):
+
+    validate_cookie()
+
     if not uploaded:
         st.write("Sorry, but you must upload your data first.")
         st.stop()

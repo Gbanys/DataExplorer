@@ -6,6 +6,10 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "alembic>=1.15.2",
+    "bcrypt>=4.3.0",
+    "eralchemy>=1.5.0",
+    "graphviz>=0.20.3",
+    "jupyter>=1.1.1",
     "langchain>=0.3.25",
     "langchain-core>=0.3.60",
     "langchain-openai>=0.3.17",
@@ -18,5 +22,7 @@ dependencies = [
     "pyyaml>=6.0.2",
     "sqlmodel>=0.0.24",
     "streamlit>=1.45.1",
+    "streamlit-authenticator>=0.4.2",
     "streamlit-chat>=0.1.1",
+    "streamlit-cookies-controller>=0.0.4",
 ]
